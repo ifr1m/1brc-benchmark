@@ -1,0 +1,14 @@
+# Generated benchmark data and build artifacts
+data/measurements_*.txt
+data/measurements_*.txt.sha256
+target/
+
+# Generated benchmark results are kept locally, except the directory marker
+results/*
+!results/.gitkeep
+
+# Local development files
+__pycache__/
+*.py[cod]
+.DS_Store
+.idea/
