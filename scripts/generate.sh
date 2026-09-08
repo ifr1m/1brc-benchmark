@@ -25,6 +25,10 @@ trap 'rm -rf "$WORK"' EXIT
 mv "$WORK/measurements.txt" "$OUTPUT"
 (
   cd "$(dirname "$OUTPUT")"
-  shasum -a 256 "$(basename "$OUTPUT")" > "$(basename "$OUTPUT").sha256"
+  if command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 "$(basename "$OUTPUT")" > "$(basename "$OUTPUT").sha256"
+  else
+    sha256sum "$(basename "$OUTPUT")" > "$(basename "$OUTPUT").sha256"
+  fi
 )
 ls -lh "$OUTPUT"

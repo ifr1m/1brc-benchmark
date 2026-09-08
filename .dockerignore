@@ -1,0 +1,13 @@
+.git
+.gitignore
+.DS_Store
+
+# Generated benchmark input, results, and build artifacts
+data/
+results/
+target/
+
+# Local development files
+__pycache__/
+*.py[cod]
+.idea/

@@ -3,6 +3,10 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 rm -rf "$ROOT/target/classes"
+rm -f \
+  "$ROOT/target/CalculateAverage_serkan_ozal.classlist" \
+  "$ROOT/target/CalculateAverage_serkan_ozal.jsa" \
+  "$ROOT/target/CalculateAverage_serkan_ozal_cds.jsa"
 mkdir -p "$ROOT/target/classes"
 
 javac \

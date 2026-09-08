@@ -9,4 +9,9 @@ if [[ ! -f "$INPUT" ]]; then
   exit 2
 fi
 
-exec /usr/bin/time -lp dd if="$INPUT" of=/dev/null bs=8m iflag=direct
+TIME_FLAGS=(-p)
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  TIME_FLAGS=(-lp)
+fi
+
+exec /usr/bin/time "${TIME_FLAGS[@]}" dd if="$INPUT" of=/dev/null bs=8m iflag=direct

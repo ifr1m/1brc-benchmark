@@ -1,6 +1,6 @@
-# 1BRC machine baseline
+# 1BRC benchmark
 
-This standalone project runs Serkan Özal's accepted 1BRC implementation against one billion generated measurements. It calibrates the upper end of byte scanning and aggregation on the machine used for the Leadgidi parser experiments.
+This project runs Serkan Özal's accepted 1BRC implementation against generated measurements. It can run directly on the host or inside a reproducible Docker environment.
 
 ## Recorded result
 
@@ -16,7 +16,7 @@ Recorded on 2026-09-07:
 | Trimmed mean, fastest and slowest removed | 1.444 s |
 | Median record rate | 697,958,248 rows/s |
 | Median input rate | 9.629 GB/s, 8.967 GiB/s |
-| Direct SSD read with `F_NOCACHE` | 11.822 GB/s, 1.167 s |
+| Direct SSD read with `iflag=direct` | 11.822 GB/s, 1.167 s |
 | Published Serkan Özal result | 1.880 s |
 
 Raw timings in seconds:
@@ -77,38 +77,49 @@ scripts/
   benchmark.py
   disk-baseline.sh
   clean-data.sh
+  doctor.sh
+  docker-benchmark.sh
 data/
 results/
 target/
+Dockerfile
+.dockerignore
 ```
 
 The generated billion-row file consumed about 13 GB and was removed after recording the baseline. Its SHA-256 remains in `results/m2-max-1b-jdk25/result.json`. Run `scripts/generate.sh 1000000000` to reproduce it; `scripts/clean-data.sh` removes generated datasets afterward.
 
-## Reproduce
+## Run the benchmark
 
-From this project directory, one command rebuilds the code, regenerates the dataset when absent, prepares CDS, runs one warmup and ten measurements, and measures direct SSD reading:
+### Directly on the host
+
+Host prerequisites are Java 25 or newer, Python 3.9 or newer, `dd`, and either `shasum` or `sha256sum`:
 
 ```bash
 scripts/rerun.sh
 ```
 
-The billion-row dataset takes about three minutes to generate on this machine and occupies about 13 GB. Subsequent reruns reuse it. Override defaults when needed:
+This rebuilds the code, regenerates the dataset when absent, prepares CDS, runs one warmup and ten measurements, verifies output checksums, and measures direct disk reading. The billion-row dataset occupies about 13 GB and is reused on later runs.
+
+Use a small run while validating the setup:
 
 ```bash
-ROWS=1000000 RUNS=3 WARMUPS=1 LABEL=smoke scripts/rerun.sh
+ROWS=1000000 RUNS=3 WARMUPS=1 LABEL=host-smoke scripts/rerun.sh
 ```
 
-The equivalent individual commands are:
+Set `RUN_DISK_BASELINE=0` to skip direct disk reading. Results are written to `results/<label>/`.
+
+### In Docker
+
+Docker must be installed and its daemon must be running:
 
 ```bash
-scripts/build.sh
-scripts/generate.sh 1000000000
-scripts/prepare-cds.sh data/measurements_1000000000.txt
-RUNS=10 WARMUPS=1 scripts/benchmark.sh \
-  data/measurements_1000000000.txt \
-  "$(date -u +%Y%m%dT%H%M%SZ)"
-scripts/disk-baseline.sh data/measurements_1000000000.txt
+ROWS=1000000 RUNS=3 WARMUPS=1 LABEL=docker-smoke \
+  scripts/docker-benchmark.sh
 ```
+
+The wrapper builds `Dockerfile`, mounts the local `data/` and `results/` directories, and runs the same `scripts/rerun.sh` workflow with Java 25. Docker runs skip the direct disk baseline by default because Docker Desktop storage is virtualized and is not comparable to a host SSD. Set `RUN_DISK_BASELINE=1` when that measurement is explicitly required.
+
+The image defaults to `1brc-benchmark:local`; override it with `IMAGE=...`. Set `ROWS`, `RUNS`, `WARMUPS`, `RUN_TIMEOUT_SECONDS`, and `LABEL` in the same way as for host runs.
 
 `benchmark.py` runs each measurement in a fresh JVM, checks that every output has the same SHA-256, and writes immutable JSON results. It reports the same trimmed-mean rule used by upstream `evaluate.sh`: discard the fastest and slowest values, then average the rest.
 
@@ -122,4 +133,4 @@ scripts/disk-baseline.sh data/measurements_1000000000.txt
 - `results/environment.txt`: hardware, OS, JDK, disk, and upstream revision.
 - `results/manifest.sha256`: evidence checksums.
 
-The 13 GB generated input was removed after measurement. Its SHA-256 is preserved in the machine-readable benchmark result.
+The 13 GB generated input is ignored by Git and can be removed with `scripts/clean-data.sh`. Its SHA-256 is preserved in each machine-readable benchmark result. Generated `target/` files and benchmark results are also kept out of Git so benchmark runs do not modify tracked files.
