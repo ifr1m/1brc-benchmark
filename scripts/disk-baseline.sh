@@ -14,4 +14,4 @@ if [[ "$(uname -s)" == "Darwin" ]]; then
   TIME_FLAGS=(-lp)
 fi
 
-exec /usr/bin/time "${TIME_FLAGS[@]}" dd if="$INPUT" of=/dev/null bs=8m iflag=direct
+exec /usr/bin/time "${TIME_FLAGS[@]}" dd if="$INPUT" of=/dev/null bs=8388608 iflag=direct

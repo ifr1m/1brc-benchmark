@@ -1,7 +1,7 @@
 FROM eclipse-temurin:25-jdk-jammy
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends --yes coreutils perl python3 \
+    && apt-get install --no-install-recommends --yes coreutils perl python3 time \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /benchmark

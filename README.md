@@ -92,7 +92,7 @@ The generated billion-row file consumed about 13 GB and was removed after record
 
 ### Directly on the host
 
-Host prerequisites are Java 25 or newer, Python 3.9 or newer, `dd`, and either `shasum` or `sha256sum`:
+Host prerequisites are Java 25 or newer, Python 3.9 or newer, `dd`, `/usr/bin/time`, and either `shasum` or `sha256sum`:
 
 ```bash
 scripts/rerun.sh

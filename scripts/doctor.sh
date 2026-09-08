@@ -38,7 +38,10 @@ PYTHON_MINOR="${PYTHON_VERSION#*.}"
   || fail "Python 3.9 or newer is required (found $PYTHON_VERSION)"
 
 case "${RUN_DISK_BASELINE:-1}" in
-  0|1) ;;
+  0) ;;
+  1)
+    [[ -x /usr/bin/time ]] || fail "/usr/bin/time is required when RUN_DISK_BASELINE=1"
+    ;;
   *) fail "RUN_DISK_BASELINE must be 0 or 1" ;;
 esac
 
