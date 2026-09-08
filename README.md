@@ -108,6 +108,15 @@ ROWS=1000000 RUNS=3 WARMUPS=1 LABEL=host-smoke scripts/rerun.sh
 
 Set `RUN_DISK_BASELINE=0` to skip direct disk reading. Results are written to `results/<label>/`.
 
+To compare host timings with Docker using the same number of CPUs, set the JVM's active processor count to Docker's configured CPU count:
+
+```bash
+JAVA_TOOL_OPTIONS="-XX:ActiveProcessorCount=$(docker info --format '{{.NCPU}}')" \
+  scripts/rerun.sh
+```
+
+This matches the JVM worker count without pinning the process to specific host cores.
+
 ### In Docker
 
 Docker must be installed and its daemon must be running:
